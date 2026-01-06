@@ -55,9 +55,9 @@ export async function PUT(
     const body = await request.json();
     const { status } = updateStatusSchema.parse(body);
 
-    const { data: order, error } = await supabaseAdmin
+    const { data: order, error } = await (supabaseAdmin as any)
       .from('orders')
-      .update({ status } as any)
+      .update({ status })
       .eq('id', params.id)
       .select()
       .single();
