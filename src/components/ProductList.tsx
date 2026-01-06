@@ -22,29 +22,60 @@ export default function ProductList({ products, itemsPerPage = 9 }: ProductListP
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Visa max 5 sidnummer på mobil, fler på desktop
+  const getPageNumbers = () => {
+    const maxVisible = window.innerWidth < 640 ? 3 : 5;
+    const pages = [];
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage < maxVisible - 1) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8">
         {currentProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center items-center space-x-2">
+        <div className="flex justify-center items-center gap-1 md:gap-2 flex-wrap">
           <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 md:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
           >
-            Föregående
+            <span className="hidden sm:inline">Föregående</span>
+            <span className="sm:hidden">‹</span>
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {currentPage > 2 && (
+            <>
+              <button
+                onClick={() => goToPage(1)}
+                className="px-3 md:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm md:text-base"
+              >
+                1
+              </button>
+              {currentPage > 3 && <span className="px-2 text-gray-500">...</span>}
+            </>
+          )}
+
+          {getPageNumbers().map((page) => (
             <button
               key={page}
               onClick={() => goToPage(page)}
-              className={`px-4 py-2 border rounded-lg ${
+              className={`px-3 md:px-4 py-2 border rounded-lg text-sm md:text-base ${
                 currentPage === page
                   ? 'bg-gold-500 text-white border-gold-500'
                   : 'border-gray-300 hover:bg-gray-50'
@@ -54,12 +85,25 @@ export default function ProductList({ products, itemsPerPage = 9 }: ProductListP
             </button>
           ))}
 
+          {currentPage < totalPages - 1 && (
+            <>
+              {currentPage < totalPages - 2 && <span className="px-2 text-gray-500">...</span>}
+              <button
+                onClick={() => goToPage(totalPages)}
+                className="px-3 md:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm md:text-base"
+              >
+                {totalPages}
+              </button>
+            </>
+          )}
+
           <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 md:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
           >
-            Nästa
+            <span className="hidden sm:inline">Nästa</span>
+            <span className="sm:hidden">›</span>
           </button>
         </div>
       )}
