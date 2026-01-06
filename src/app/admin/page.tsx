@@ -178,7 +178,7 @@ export default function AdminDashboard() {
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-semibold mb-6">Snabbåtgärder</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link
                   href="/admin/products"
                   className="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-gold-500 hover:bg-gold-50 transition"
@@ -217,26 +217,6 @@ export default function AdminDashboard() {
                     />
                   </svg>
                   <span className="font-semibold">Hantera Ordrar</span>
-                </Link>
-
-                <Link
-                  href="/admin/api-keys"
-                  className="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-gold-500 hover:bg-gold-50 transition"
-                >
-                  <svg
-                    className="w-6 h-6 text-gold-600 mr-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-                    />
-                  </svg>
-                  <span className="font-semibold">API-nycklar</span>
                 </Link>
 
                 <Link
