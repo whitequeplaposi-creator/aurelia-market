@@ -22,7 +22,7 @@ export async function PUT(
     const { quantity } = updateQuantitySchema.parse(body);
 
     // Get cart item
-    const { data: cartItem, error: cartError } = await supabaseAdmin
+    const { data: cartItem, error: cartError } = await (supabaseAdmin as any)
       .from('cart_items')
       .select('*, product:products(*)')
       .eq('id', params.id)
@@ -39,7 +39,7 @@ export async function PUT(
     }
 
     // Update quantity
-    const { data: updatedItem, error } = await supabaseAdmin
+    const { data: updatedItem, error } = await (supabaseAdmin as any)
       .from('cart_items')
       .update({ quantity })
       .eq('id', params.id)
@@ -65,7 +65,7 @@ export async function DELETE(
   try {
     const user = getAuthUser(request);
 
-    const { error } = await supabaseAdmin
+    const { error } = await (supabaseAdmin as any)
       .from('cart_items')
       .delete()
       .eq('id', params.id)

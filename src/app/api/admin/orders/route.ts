@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     requireAdmin(request);
 
-    const { data: orders, error } = await supabaseAdmin
+    const { data: orders, error } = await (supabaseAdmin as any)
       .from('orders')
       .select(`
         *,

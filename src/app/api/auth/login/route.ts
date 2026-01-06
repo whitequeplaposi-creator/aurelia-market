@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = loginSchema.parse(sanitizedBody);
 
     // Get user
-    const { data: user, error } = await supabaseAdmin
+    const { data: user, error } = await (supabaseAdmin as any)
       .from('users')
       .select('*')
       .eq('email', email)

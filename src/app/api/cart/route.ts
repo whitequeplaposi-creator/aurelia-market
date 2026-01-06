@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = getAuthUser(request);
 
-    const { data: cartItems, error } = await supabaseAdmin
+    const { data: cartItems, error } = await (supabaseAdmin as any)
       .from('cart_items')
       .select(`
         *,

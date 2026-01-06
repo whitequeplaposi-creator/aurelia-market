@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = registerSchema.parse(sanitizedBody);
 
     // Check if user exists
-    const { data: existingUser } = await supabaseAdmin
+    const { data: existingUser } = await (supabaseAdmin as any)
       .from('users')
       .select('id')
       .eq('email', email)
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 10);
 
     // Create user
-    const { data: user, error } = await supabaseAdmin
+    const { data: user, error } = await (supabaseAdmin as any)
       .from('users')
       .insert({
         email,

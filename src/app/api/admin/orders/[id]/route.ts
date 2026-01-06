@@ -21,7 +21,7 @@ export async function GET(
   try {
     requireAdmin(request);
 
-    const { data: order, error } = await supabaseAdmin
+    const { data: order, error } = await (supabaseAdmin as any)
       .from('orders')
       .select(`
         *,

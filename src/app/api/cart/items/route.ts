@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const { productId, quantity } = addToCartSchema.parse(body);
 
     // Check if product exists and has stock
-    const { data: product, error: productError } = await supabaseAdmin
+    const { data: product, error: productError } = await (supabaseAdmin as any)
       .from('products')
       .select('*')
       .eq('id', productId)
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if item already in cart
-    const { data: existingItem } = await supabaseAdmin
+    const { data: existingItem } = await (supabaseAdmin as any)
       .from('cart_items')
       .select('*')
       .eq('user_id', user.userId)
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         throw new ApiError(400, 'Insufficient stock');
       }
 
-      const { data: updatedItem, error } = await supabaseAdmin
+      const { data: updatedItem, error } = await (supabaseAdmin as any)
         .from('cart_items')
         .update({ quantity: newQuantity })
         .eq('id', existingItem.id)
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Add new item
-    const { data: newItem, error } = await supabaseAdmin
+    const { data: newItem, error } = await (supabaseAdmin as any)
       .from('cart_items')
       .insert({
         user_id: user.userId,

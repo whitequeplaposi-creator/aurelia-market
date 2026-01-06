@@ -32,14 +32,14 @@ export async function POST(request: NextRequest) {
         const orderId = paymentIntent.metadata.orderId;
 
         // Update order status
-        await supabaseAdmin
+        await (supabaseAdmin as any)
           .from('orders')
           .update({ status: 'paid' })
           .eq('id', orderId);
 
         // Clear cart
         const userId = paymentIntent.metadata.userId;
-        await supabaseAdmin
+        await (supabaseAdmin as any)
           .from('cart_items')
           .delete()
           .eq('user_id', userId);
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         const orderId = paymentIntent.metadata.orderId;
 
         // Update order status
-        await supabaseAdmin
+        await (supabaseAdmin as any)
           .from('orders')
           .update({ status: 'cancelled' })
           .eq('id', orderId);

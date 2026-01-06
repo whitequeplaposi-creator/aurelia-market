@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   try {
     requireAdmin(request);
 
-    const { data: products, error } = await supabaseAdmin
+    const { data: products, error } = await (supabaseAdmin as any)
       .from('products')
       .select('*')
       .order('created_at', { ascending: false });
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = productSchema.parse(body);
 
-    const { data: product, error } = await supabaseAdmin
+    const { data: product, error } = await (supabaseAdmin as any)
       .from('products')
       .insert(validatedData)
       .select()

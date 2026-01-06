@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const { paymentMethod } = checkoutSchema.parse(body);
 
     // Get cart items
-    const { data: cartItems, error: cartError } = await supabaseAdmin
+    const { data: cartItems, error: cartError } = await (supabaseAdmin as any)
       .from('cart_items')
       .select(`
         *,
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Create order
-    const { data: order, error: orderError } = await supabaseAdmin
+    const { data: order, error: orderError } = await (supabaseAdmin as any)
       .from('orders')
       .insert({
         user_id: user.userId,
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       price_at_purchase: item.product.price,
     }));
 
-    const { error: itemsError } = await supabaseAdmin
+    const { error: itemsError } = await (supabaseAdmin as any)
       .from('order_items')
       .insert(orderItems);
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Update order with payment intent ID
-    await supabaseAdmin
+    await (supabaseAdmin as any)
       .from('orders')
       .update({ stripe_payment_intent_id: paymentIntent.id })
       .eq('id', order.id);

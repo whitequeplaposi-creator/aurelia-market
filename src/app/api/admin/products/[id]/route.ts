@@ -24,7 +24,7 @@ export async function GET(
   try {
     requireAdmin(request);
 
-    const { data: product, error } = await supabaseAdmin
+    const { data: product, error } = await (supabaseAdmin as any)
       .from('products')
       .select('*')
       .eq('id', params.id)
@@ -49,7 +49,7 @@ export async function PUT(
     const body = await request.json();
     const validatedData = productUpdateSchema.parse(body);
 
-    const { data: product, error } = await supabaseAdmin
+    const { data: product, error } = await (supabaseAdmin as any)
       .from('products')
       .update(validatedData)
       .eq('id', params.id)
@@ -72,7 +72,7 @@ export async function DELETE(
   try {
     requireAdmin(request);
 
-    const { data: product, error } = await supabaseAdmin
+    const { data: product, error } = await (supabaseAdmin as any)
       .from('products')
       .update({ active: false })
       .eq('id', params.id)
