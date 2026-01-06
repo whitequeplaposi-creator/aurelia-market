@@ -1,6 +1,3 @@
-// Force dynamic rendering to prevent prerendering errors
-export const dynamic = 'force-dynamic';
-
 'use client';
 
 import { useEffect, useState } from 'react';
