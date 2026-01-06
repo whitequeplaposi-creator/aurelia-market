@@ -16,5 +16,10 @@ export function getSupabaseAdmin() {
   return _supabaseAdmin;
 }
 
-// For backwards compatibility
-export const supabaseAdmin = getSupabaseAdmin();
+// For backwards compatibility - use getter to avoid module-level initialization
+export const supabaseAdmin = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    const admin = getSupabaseAdmin();
+    return (admin as any)[prop];
+  }
+});
