@@ -57,7 +57,7 @@ export async function PUT(
 
     const { data: order, error } = await supabaseAdmin
       .from('orders')
-      .update({ status })
+      .update({ status } as any)
       .eq('id', params.id)
       .select()
       .single();
