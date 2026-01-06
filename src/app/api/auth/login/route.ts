@@ -18,7 +18,14 @@ const loginSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    strictRateLimit(request);
+    try {
+      strictRateLimit(request);
+    } catch (rateLimitError: any) {
+      return NextResponse.json(
+        { error: rateLimitError.message || 'För många förfrågningar, försök igen senare' },
+        { status: 429 }
+      );
+    }
     
     let body;
     try {

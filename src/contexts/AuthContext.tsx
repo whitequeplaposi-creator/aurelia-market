@@ -42,7 +42,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      // Kontrollera om svaret har innehåll
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Servern returnerade ett ogiltigt svar');
+      }
+
+      // Försök att parsa JSON
+      let data;
+      try {
+        const text = await response.text();
+        if (!text || text.trim() === '') {
+          throw new Error('Servern returnerade ett tomt svar');
+        }
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Kunde inte läsa serverns svar');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Inloggning misslyckades');
@@ -69,7 +86,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      // Kontrollera om svaret har innehåll
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Servern returnerade ett ogiltigt svar');
+      }
+
+      // Försök att parsa JSON
+      let data;
+      try {
+        const text = await response.text();
+        if (!text || text.trim() === '') {
+          throw new Error('Servern returnerade ett tomt svar');
+        }
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError);
+        throw new Error('Kunde inte läsa serverns svar');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Registrering misslyckades');
