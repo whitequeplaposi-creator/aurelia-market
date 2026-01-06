@@ -12,24 +12,32 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
+  const categoryFilter = searchParams.get('category') || '';
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredProducts(products);
-    } else {
+    let filtered = products;
+
+    // Filter by category
+    if (categoryFilter) {
+      filtered = filtered.filter(product => product.category === categoryFilter);
+    }
+
+    // Filter by search query
+    if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase();
-      const filtered = products.filter(
+      filtered = filtered.filter(
         (product) =>
           product.name.toLowerCase().includes(query) ||
           product.description.toLowerCase().includes(query)
       );
-      setFilteredProducts(filtered);
     }
-  }, [searchQuery, products]);
+
+    setFilteredProducts(filtered);
+  }, [searchQuery, categoryFilter, products]);
 
   const fetchProducts = async () => {
     try {
@@ -42,6 +50,20 @@ function ProductsContent() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const categories: Record<string, string> = {
+      'kläder-dam': 'Kläder Dam',
+      'kläder-herr': 'Kläder Herr',
+      'skor-dam': 'Skor Dam',
+      'skor-herr': 'Skor Herr',
+      'parfym': 'Parfym',
+      'skönhet': 'Skönhet',
+      'hemredskap': 'Hemredskap',
+      'accessoarer': 'Accessoarer',
+    };
+    return categories[categoryId] || categoryId;
   };
 
   if (loading) {
@@ -57,19 +79,23 @@ function ProductsContent() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold mb-8">Våra Produkter</h1>
+        <h1 className="text-4xl font-bold mb-2">
+          {categoryFilter ? getCategoryName(categoryFilter) : 'Våra Produkter'}
+        </h1>
         
-        {searchQuery && (
+        {(searchQuery || categoryFilter) && (
           <p className="mb-6 text-gray-600">
-            Visar {filteredProducts.length} av {products.length} produkter för &quot;{searchQuery}&quot;
+            Visar {filteredProducts.length} av {products.length} produkter
+            {searchQuery && ` för "${searchQuery}"`}
+            {categoryFilter && !searchQuery && ` i ${getCategoryName(categoryFilter)}`}
           </p>
         )}
         
         {filteredProducts.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-xl text-gray-600">
-              {searchQuery
-                ? `Inga produkter hittades för "${searchQuery}"`
+              {searchQuery || categoryFilter
+                ? `Inga produkter hittades`
                 : 'Inga produkter tillgängliga för tillfället.'}
             </p>
           </div>

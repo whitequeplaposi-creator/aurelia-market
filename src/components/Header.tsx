@@ -33,6 +33,17 @@ export default function Header() {
 
   const showSearch = pathname === '/products' || pathname?.startsWith('/products');
 
+  const categories = [
+    { id: 'kläder-dam', name: 'Kläder Dam', icon: '👗' },
+    { id: 'kläder-herr', name: 'Kläder Herr', icon: '👔' },
+    { id: 'skor-dam', name: 'Skor Dam', icon: '👠' },
+    { id: 'skor-herr', name: 'Skor Herr', icon: '👞' },
+    { id: 'parfym', name: 'Parfym', icon: '🌸' },
+    { id: 'skönhet', name: 'Skönhet', icon: '💄' },
+    { id: 'hemredskap', name: 'Hemredskap', icon: '🏠' },
+    { id: 'accessoarer', name: 'Accessoarer', icon: '👜' },
+  ];
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 md:py-4">
@@ -206,6 +217,22 @@ export default function Header() {
         )}
       </div>
 
+      {/* Category Navigation - Desktop */}
+      <div className="hidden lg:block border-t border-gray-100 mt-3 pt-3">
+        <div className="flex items-center justify-center space-x-6 overflow-x-auto">
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/products?category=${category.id}`}
+              className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gold-600 transition whitespace-nowrap"
+            >
+              <span>{category.icon}</span>
+              <span>{category.name}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
@@ -215,13 +242,30 @@ export default function Header() {
               onClick={() => setMobileMenuOpen(false)}
               className="block py-2 text-gray-700 hover:text-gold-600 transition font-medium"
             >
-              Produkter
+              Alla Produkter
             </Link>
+            
+            {/* Categories in Mobile Menu */}
+            <div className="border-t border-gray-200 pt-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Kategorier</p>
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/products?category=${category.id}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center space-x-2 py-2 text-gray-700 hover:text-gold-600 transition"
+                >
+                  <span>{category.icon}</span>
+                  <span className="text-sm">{category.name}</span>
+                </Link>
+              ))}
+            </div>
+
             {user && (
               <Link
                 href="/orders"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-2 text-gray-700 hover:text-gold-600 transition font-medium"
+                className="block py-2 text-gray-700 hover:text-gold-600 transition font-medium border-t border-gray-200 pt-3"
               >
                 Mina Ordrar
               </Link>

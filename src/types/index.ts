@@ -1,5 +1,15 @@
 export type UserRole = 'customer' | 'admin';
 
+export type ProductCategory = 
+  | 'kläder-dam'
+  | 'kläder-herr'
+  | 'skor-dam'
+  | 'skor-herr'
+  | 'parfym'
+  | 'skönhet'
+  | 'hemredskap'
+  | 'accessoarer';
+
 export interface User {
   id: string;
   email: string;
@@ -16,6 +26,7 @@ export interface Product {
   image: string;
   stock: number;
   active: boolean;
+  category: ProductCategory;
   createdAt: Date;
   updatedAt: Date;
 }
