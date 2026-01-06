@@ -7,6 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Order } from '@/types';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);

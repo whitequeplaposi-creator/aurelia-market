@@ -6,6 +6,9 @@ import Layout from '@/components/Layout';
 import ProductList from '@/components/ProductList';
 import { Product } from '@/types';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);

@@ -11,6 +11,9 @@ import { useRouter } from 'next/navigation';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function CheckoutPage() {
   const [clientSecret, setClientSecret] = useState('');
   const [loading, setLoading] = useState(true);

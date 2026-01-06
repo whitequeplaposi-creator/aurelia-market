@@ -6,6 +6,9 @@ import Layout from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Order } from '@/types';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
