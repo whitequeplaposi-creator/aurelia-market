@@ -19,6 +19,7 @@ CREATE TABLE products (
   price DECIMAL(10, 2) NOT NULL CHECK (price > 0),
   image VARCHAR(500),
   stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  category VARCHAR(50),
   active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
@@ -73,6 +74,7 @@ CREATE TABLE cart_items (
 -- Indexes
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_products_active ON products(active);
+CREATE INDEX idx_products_category ON products(category);
 CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_order_items_order_id ON order_items(order_id);
