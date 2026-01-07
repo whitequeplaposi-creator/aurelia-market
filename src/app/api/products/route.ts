@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { turso } from '@/lib/turso';
 import { getMockProducts, isDemoMode } from '@/lib/mockData';
 
 // Force dynamic rendering
@@ -13,14 +13,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ products });
     }
 
-    // Production mode - använd Supabase
-    const { data: products, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('active', true)
-      .order('created_at', { ascending: false });
+    // Production mode - använd Turso
+    if (!turso) {
+      return NextResponse.json(
+        { error: 'Databas ej tillgänglig' },
+        { status: 500 }
+      );
+    }
 
-    if (error) throw error;
+    const result = await turso.execute({
+      sql: 'SELECT * FROM products WHERE active = 1 ORDER BY created_at DESC',
+      args: []
+    });
+
+    const products = result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      image: row.image,
+      stock: row.stock,
+      category: row.category,
+      active: row.active === 1,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
 
     return NextResponse.json({ products });
   } catch (error) {

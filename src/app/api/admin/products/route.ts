@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { turso } from '@/lib/turso';
 import { requireAdmin } from '@/middleware/auth';
 import { handleApiError, ApiError } from '@/middleware/errorHandler';
 import { z } from 'zod';
+import { isDemoMode } from '@/lib/mockData';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,7 @@ const productSchema = z.object({
   price: z.number().positive(),
   image: z.string().url().optional(),
   stock: z.number().int().min(0),
+  category: z.string().optional(),
 });
 
 // GET all products (admin)
@@ -20,12 +22,31 @@ export async function GET(request: NextRequest) {
   try {
     requireAdmin(request);
 
-    const { data: products, error } = await (supabaseAdmin as any)
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+    if (isDemoMode()) {
+      return NextResponse.json({ products: [] });
+    }
 
-    if (error) throw error;
+    if (!turso) {
+      throw new ApiError(500, 'Databas ej tillgänglig');
+    }
+
+    const result = await turso.execute({
+      sql: 'SELECT * FROM products ORDER BY created_at DESC',
+      args: []
+    });
+
+    const products = result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      image: row.image,
+      stock: row.stock,
+      category: row.category,
+      active: row.active === 1,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
 
     return NextResponse.json({ products });
   } catch (error) {
@@ -41,13 +62,48 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = productSchema.parse(body);
 
-    const { data: product, error } = await (supabaseAdmin as any)
-      .from('products')
-      .insert(validatedData)
-      .select()
-      .single();
+    if (isDemoMode()) {
+      return NextResponse.json(
+        { error: 'Demo mode - kan inte skapa produkter' },
+        { status: 403 }
+      );
+    }
 
-    if (error) throw error;
+    if (!turso) {
+      throw new ApiError(500, 'Databas ej tillgänglig');
+    }
+
+    const result = await turso.execute({
+      sql: `INSERT INTO products (name, description, price, image, stock, category, active) 
+            VALUES (?, ?, ?, ?, ?, ?, 1) 
+            RETURNING *`,
+      args: [
+        validatedData.name,
+        validatedData.description,
+        validatedData.price,
+        validatedData.image || null,
+        validatedData.stock,
+        validatedData.category || null
+      ]
+    });
+
+    if (result.rows.length === 0) {
+      throw new ApiError(500, 'Failed to create product');
+    }
+
+    const row = result.rows[0];
+    const product = {
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      price: row.price,
+      image: row.image,
+      stock: row.stock,
+      category: row.category,
+      active: row.active === 1,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
 
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
