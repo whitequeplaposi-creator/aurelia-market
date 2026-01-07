@@ -34,6 +34,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('🔐 Försöker logga in...', { email });
+      
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -42,9 +44,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('📡 Svar mottaget:', {
+        status: response.status,
+        statusText: response.statusText,
+        contentType: response.headers.get('content-type'),
+      });
+
       // Kontrollera om svaret har innehåll
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
+        console.error('❌ Ogiltigt content-type:', contentType);
         throw new Error('Servern returnerade ett ogiltigt svar');
       }
 
@@ -52,18 +61,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let data;
       try {
         const text = await response.text();
+        console.log('📄 Raw response:', text.substring(0, 100) + '...');
+        
         if (!text || text.trim() === '') {
           throw new Error('Servern returnerade ett tomt svar');
         }
         data = JSON.parse(text);
+        console.log('✅ JSON parsed successfully');
       } catch (parseError) {
-        console.error('JSON parse error:', parseError);
+        console.error('❌ JSON parse error:', parseError);
         throw new Error('Kunde inte läsa serverns svar');
       }
 
       if (!response.ok) {
+        console.error('❌ Login failed:', data.error);
         throw new Error(data.error || 'Inloggning misslyckades');
       }
+      
+      console.log('✅ Login successful!', { userId: data.user?.id, role: data.user?.role });
       
       setUser(data.user);
       setToken(data.token);
@@ -71,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       throw error;
     }
   };

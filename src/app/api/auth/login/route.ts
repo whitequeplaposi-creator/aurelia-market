@@ -16,11 +16,14 @@ const loginSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  console.log('🔐 Login request received');
+  
   try {
     // Rate limiting
     try {
       strictRateLimit(request);
     } catch (rateLimitError: any) {
+      console.error('❌ Rate limit exceeded');
       return NextResponse.json(
         { error: rateLimitError.message || 'För många förfrågningar, försök igen senare' },
         { 
@@ -33,8 +36,9 @@ export async function POST(request: NextRequest) {
     let body;
     try {
       body = await request.json();
+      console.log('📧 Login attempt for:', body.email);
     } catch (jsonError) {
-      console.error('JSON parse error:', jsonError);
+      console.error('❌ JSON parse error:', jsonError);
       return NextResponse.json(
         { error: 'Ogiltig förfrågan - JSON-fel' },
         { 
@@ -52,7 +56,7 @@ export async function POST(request: NextRequest) {
     try {
       validatedData = loginSchema.parse(sanitizedBody);
     } catch (validationError) {
-      console.error('Validation error:', validationError);
+      console.error('❌ Validation error:', validationError);
       return NextResponse.json(
         { error: 'Ogiltig e-postadress eller lösenord' },
         { 
@@ -66,6 +70,7 @@ export async function POST(request: NextRequest) {
 
     // Demo mode - returnera mock user
     if (isDemoMode()) {
+      console.log('🎭 Demo mode active - returning mock user');
       const token = jwt.sign(
         { userId: mockDemoUser.id, email: mockDemoUser.email, role: mockDemoUser.role },
         process.env.JWT_SECRET || 'demo-secret',
@@ -85,6 +90,9 @@ export async function POST(request: NextRequest) {
 
     // Production mode - använd Turso
     if (!turso) {
+      console.error('❌ Turso client not initialized');
+      console.error('TURSO_DATABASE_URL:', process.env.TURSO_DATABASE_URL ? 'Set' : 'Not set');
+      console.error('TURSO_AUTH_TOKEN:', process.env.TURSO_AUTH_TOKEN ? 'Set' : 'Not set');
       return NextResponse.json(
         { error: 'Databas ej tillgänglig' },
         { 
@@ -93,6 +101,8 @@ export async function POST(request: NextRequest) {
         }
       );
     }
+    
+    console.log('🔍 Querying database for user...');
     
     // Get user
     const result = await turso.execute({
@@ -103,6 +113,7 @@ export async function POST(request: NextRequest) {
     const user = result.rows[0];
 
     if (!user) {
+      console.log('❌ User not found');
       return NextResponse.json(
         { error: 'Felaktig e-postadress eller lösenord' },
         { 
@@ -111,11 +122,14 @@ export async function POST(request: NextRequest) {
         }
       );
     }
+
+    console.log('✅ User found, verifying password...');
 
     // Verify password
     const validPassword = await bcrypt.compare(password, user.password_hash as string);
 
     if (!validPassword) {
+      console.log('❌ Invalid password');
       return NextResponse.json(
         { error: 'Felaktig e-postadress eller lösenord' },
         { 
@@ -124,6 +138,8 @@ export async function POST(request: NextRequest) {
         }
       );
     }
+
+    console.log('✅ Password valid, generating token...');
 
     // Generate JWT
     const token = jwt.sign(
@@ -131,6 +147,8 @@ export async function POST(request: NextRequest) {
       process.env.JWT_SECRET!,
       { expiresIn: '7d' }
     );
+
+    console.log('✅ Login successful for:', email);
 
     return NextResponse.json(
       {
@@ -148,7 +166,7 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
     
     // Ge mer specifika felmeddelanden
     if (error instanceof z.ZodError) {
