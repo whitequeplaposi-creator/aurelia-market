@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h1>Test Login</h1>
+    <form id="loginForm">
+        <div>
+            <label>Email:</label>
+            <input type="email" id="email" value="test.user@gmail.com" />
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" id="password" value="testpassword123" />
+        </div>
+        <button type="submit">Login</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = 'Försöker logga in...';
+            
+            try {
+                console.log('🔐 Försöker logga in...', { email });
+                
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                console.log('📡 Svar mottaget:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    contentType: response.headers.get('content-type'),
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.error('❌ Ogiltigt content-type:', contentType);
+                    throw new Error('Servern returnerade ett ogiltigt svar');
+                }
+
+                const text = await response.text();
+                console.log('📄 Raw response:', text);
+                
+                if (!text || text.trim() === '') {
+                    throw new Error('Servern returnerade ett tomt svar');
+                }
+                
+                const data = JSON.parse(text);
+                console.log('✅ JSON parsed successfully', data);
+
+                if (!response.ok) {
+                    console.error('❌ Login failed:', data.error);
+                    throw new Error(data.error || 'Inloggning misslyckades');
+                }
+                
+                console.log('✅ Login successful!', { userId: data.user?.id, role: data.user?.role });
+                
+                resultDiv.innerHTML = `
+                    <h2>✅ Login Successful!</h2>
+                    <p>Email: ${data.user.email}</p>
+                    <p>Role: ${data.user.role}</p>
+                    <p>Token: ${data.token.substring(0, 20)}...</p>
+                `;
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                resultDiv.innerHTML = `<h2>❌ Error:</h2><p>${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
