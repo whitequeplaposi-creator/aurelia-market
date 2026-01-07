@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { supabaseAdmin } from '@/lib/supabase';
 import { z } from 'zod';
 import { strictRateLimit } from '@/lib/rateLimit';
 import { sanitizeInput } from '@/middleware/security';
 import { isDemoMode, mockDemoUser } from '@/lib/mockData';
+import { getTursoClient } from '@/lib/turso';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -83,15 +83,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Production mode - använd Supabase
+    // Production mode - använd Turso
+    const db = getTursoClient();
+    
     // Check if user exists
-    const { data: existingUser } = await (supabaseAdmin as any)
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
+    const existingUserResult = await db.execute({
+      sql: 'SELECT id FROM users WHERE email = ?',
+      args: [email]
+    });
 
-    if (existingUser) {
+    if (existingUserResult.rows.length > 0) {
       return NextResponse.json(
         { error: 'E-postadressen är redan registrerad' },
         { 
@@ -105,21 +106,20 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 10);
 
     // Create user
-    const { data: user, error } = await (supabaseAdmin as any)
-      .from('users')
-      .insert({
-        email,
-        password_hash: passwordHash,
-        role: 'customer',
-      })
-      .select('id, email, role, created_at, updated_at')
-      .single();
+    const insertResult = await db.execute({
+      sql: 'INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?) RETURNING id, email, role, created_at, updated_at',
+      args: [email, passwordHash, 'customer']
+    });
 
-    if (error) throw error;
+    if (insertResult.rows.length === 0) {
+      throw new Error('Failed to create user');
+    }
+
+    const user = insertResult.rows[0];
 
     // Generate JWT
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id as string, email: user.email as string, role: user.role as string },
       process.env.JWT_SECRET!,
       { expiresIn: '7d' }
     );

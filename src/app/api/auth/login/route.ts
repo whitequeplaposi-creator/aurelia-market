@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { supabaseAdmin } from '@/lib/supabase';
+import { turso } from '@/lib/turso';
 import { z } from 'zod';
 import { strictRateLimit } from '@/lib/rateLimit';
 import { sanitizeInput } from '@/middleware/security';
@@ -83,15 +83,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Production mode - använd Supabase
+    // Production mode - använd Turso
+    if (!turso) {
+      return NextResponse.json(
+        { error: 'Databas ej tillgänglig' },
+        { 
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
     // Get user
-    const { data: user, error } = await (supabaseAdmin as any)
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .single();
+    const result = await turso.execute({
+      sql: 'SELECT * FROM users WHERE email = ? LIMIT 1',
+      args: [email]
+    });
 
-    if (error || !user) {
+    const user = result.rows[0];
+
+    if (!user) {
       return NextResponse.json(
         { error: 'Felaktig e-postadress eller lösenord' },
         { 
@@ -102,7 +113,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    const validPassword = await bcrypt.compare(password, user.password_hash);
+    const validPassword = await bcrypt.compare(password, user.password_hash as string);
 
     if (!validPassword) {
       return NextResponse.json(

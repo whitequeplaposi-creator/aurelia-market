@@ -218,18 +218,24 @@ export default function Header() {
       </div>
 
       {/* Category Navigation - Desktop */}
-      <div className="hidden lg:block border-t border-gray-100 mt-3 pt-3">
-        <div className="flex items-center justify-center space-x-6 overflow-x-auto">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/products?category=${category.id}`}
-              className="flex items-center space-x-1 text-sm text-gray-600 hover:text-gold-600 transition whitespace-nowrap"
-            >
-              <span>{category.icon}</span>
-              <span>{category.name}</span>
-            </Link>
-          ))}
+      <div className="hidden lg:block border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-center gap-2 overflow-x-auto">
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/products?category=${category.id}`}
+                className="group flex flex-col items-center px-4 py-3 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 min-w-[100px]"
+              >
+                <span className="text-2xl mb-1 group-hover:scale-110 transition-transform duration-300">
+                  {category.icon}
+                </span>
+                <span className="text-xs font-medium text-gray-600 group-hover:text-gold-600 transition-colors text-center">
+                  {category.name}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
