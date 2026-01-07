@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "db:setup": "tsx scripts/setup-turso-database.ts",
-    "db:seed": "tsx scripts/seed-turso-database.ts"
+    "db:seed": "tsx scripts/seed-turso-database.ts",
+    "db:add-test-product": "tsx scripts/add-test-product.ts",
+    "db:remove-test-products": "tsx scripts/remove-test-products.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.5.6",
